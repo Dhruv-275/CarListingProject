@@ -1,24 +1,39 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FiArrowRight } from 'react-icons/fi';
 
+export default function NoPage() { 
 
-export default function NoPage() {
- const navigate = useNavigate()
-
- function handleButton(){
-  navigate("/home")
- }
-
-
+  const image = "/images/pagenotfound.png"
   return (
-    <div className="private-no-page">
-      <h1 className="bold-text">Sorry, this page isn't available.</h1>
-      <p>
-        The link you followed may be broken, or the page may have been removed
+    <main className="page-width not-found-page" style={{ padding: '90px 20px', textAlign: 'center' }}>
+      <img
+        src={image}
+        alt="404 Page Not Found"
+        className="not-found-illustration"
+
+      />
+      <span className="section-kicker">404 Error</span>
+      <h1 style={{ marginTop: '8px', marginBottom: '12px' }}>Page not found.</h1>
+      <p style={{ color: 'var(--muted-foreground)', maxWidth: '480px', margin: '0 auto 24px' }}>
+        The page you are looking for doesn't exist or has moved. Browse our available collection or head back home.
       </p>
-      <button className="home-button" onClick={handleButton}>
-        Go to Homepage
-      </button>
-    </div>
+      <Link
+        to="/"
+        className="btn button-green"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          padding: '12px 28px',
+          color: '#ffffff',
+          textDecoration: 'none',
+          fontWeight: '600',
+        }}
+      >
+        Back to Homepage <FiArrowRight size={16} />
+      </Link>
+    </main>
   );
 }

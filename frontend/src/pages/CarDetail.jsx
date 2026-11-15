@@ -162,7 +162,7 @@ export default function CarDetail() {
           </Link>
 
           <a
-            href={`https://wa.me/447931224287?text=${encodeURIComponent(
+            href={`https://wa.me/08058364295?text=${encodeURIComponent(
               `Hi, I'm interested in the ${vehicleFullName}`
             )}`}
             target="_blank"
@@ -180,8 +180,8 @@ export default function CarDetail() {
             <FaWhatsapp size={17} /> Ask us on WhatsApp
           </a>
 
-          <a className="detail-call-link" href="tel:+447931224287">
-            Call +44 7931 224287
+          <a className="detail-call-link" href="tel:08058364295">
+            Call 08058364295
           </a>
         </aside>
       </div>

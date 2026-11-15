@@ -21,6 +21,13 @@ const ContactIcon = ({ type }) => {
         <circle cx="12" cy="10" r="2.5" />
       </>
     ),
+    instagram: (
+  <>  
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.5" cy="6.5" r=".8" />
+  </>
+),
   };
 
   return (
@@ -188,40 +195,48 @@ export default function Footer({
           </div>
 
           {/* CONTACT */}
-          <div className="fg-contact-column">
-            <h3 className="fg-heading">Contact</h3>
+         
+{/* CONTACT */}
+<div className="fg-contact-column">
+  <h3 className="fg-heading">Contact</h3>
 
-            <div className="fg-contact-list">
+  <div className="fg-contact-list">
 
-              <FooterContactCard
-                type="phone"
-                label="Call Us"
-                href="tel:+447931224287"
-              >
-                +44 7931 224287
-              </FooterContactCard>
+    <FooterContactCard
+      type="phone"
+      label="Call Us"
+      href="tel:08058364295"
+    >
+      08058364295
+    </FooterContactCard>
 
-              {contactEmail && (
-                <FooterContactCard
-                  type="email"
-                  label="Email Us"
-                  href={`mailto:${contactEmail}`}
-                >
-                  {contactEmail}
-                </FooterContactCard>
-              )}
+    <FooterContactCard
+      type="phone"
+      label="Call Us"
+      href="tel:08058364295"
+    >
+      +447931224287
+    </FooterContactCard>
 
-              {address && (
-                <FooterContactCard
-                  type="location"
-                  label="Visit Us"
-                >
-                  {address}
-                </FooterContactCard>
-              )}
+    <FooterContactCard
+      type="phone"
+      label="Call Us"
+      href="tel:+13172968221"
+    >
+      +1 317 296 8221
+    </FooterContactCard>
 
-            </div>
-          </div>
+    <FooterContactCard
+      type="instagram"
+      label="Follow Us"
+      href="https://www.instagram.com/fawmondgalaxy/"
+    >
+      @fawmondgalaxy
+    </FooterContactCard>
+
+  </div>
+</div>
+
 
         </div>
 

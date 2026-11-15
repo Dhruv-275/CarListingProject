@@ -71,8 +71,8 @@ export default function Home() {
             <Link to="/cars" className="btn button-green button-large">
               Browse our cars <FiArrowRight size={17} />
             </Link>
-            <a href="tel:+447931224287" className="hero-phone">
-              Call us on <strong>+44 7931 224287</strong>
+            <a href="tel:08058364295" className="hero-phone">
+              Call us on <strong>08058364295</strong>
             </a>
           </div>
           <div className="hero-proof">

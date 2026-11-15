@@ -12,7 +12,7 @@ export default function Navbar() {
     { to: '/cars', label: 'Our cars' },
     // { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
-    { to: '/admin', label: 'Admin' },
+    // { to: '/admin', label: 'Admin' },
   ];
 
   // Automatically close mobile menu when navigating to another route
@@ -57,12 +57,12 @@ export default function Navbar() {
         </nav>
 
         <div className="header-contact">
-          <a href="tel:+447931224287" className="header-phone">
+          <a href="tel:08058364295" className="header-phone">
             <FiPhone aria-hidden="true" size={16} />
-            <span className="number-edit">+44 7931 224287</span>
+            <span className="number-edit">08058364295</span>
           </a>
           <a
-            href="https://wa.me/447931224287"
+            href="https://wa.me/08058364295"
             target="_blank"
             rel="noreferrer"
             className="btn button-green header-cta"
@@ -111,12 +111,12 @@ export default function Navbar() {
           ))}
 
           <div className="mobile-nav-actions">
-            <a href="tel:+447931224287" className="mobile-phone-link">
+            <a href="tel:08058364295" className="mobile-phone-link">
               <FiPhone size={16} />
-              <span>+44 7931 224287</span>
+              <span>08058364295</span>
             </a>
             <a
-              href="https://wa.me/447931224287"
+              href="https://wa.me/08058364295"
               target="_blank"
               rel="noreferrer"
               className="btn button-green mobile-whatsapp-link"

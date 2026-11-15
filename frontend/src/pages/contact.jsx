@@ -104,17 +104,17 @@ export default function Contact() {
           </p>
 
           <div className="contact-methods">
-            <a href="tel:+447931224287">
+            <a href="tel:08058364295">
               <span className="contact-method-icon">
                 <FiPhone size={18} />
               </span>
               <span>
                 <small>Give us a call</small>
-                <strong>+44 7931 224287</strong>
+                <strong>08058364295</strong>
               </span>
             </a>
 
-            <a href="https://wa.me/447931224287" target="_blank" rel="noreferrer">
+            <a href="https://wa.me/08058364295" target="_blank" rel="noreferrer">
               <span className="contact-method-icon">
                 <FaWhatsapp size={18} />
               </span>

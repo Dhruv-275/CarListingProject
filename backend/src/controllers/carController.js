@@ -1,5 +1,18 @@
 const Car = require('../models/Car');
 const mongoose = require('mongoose');
+const path = require('path');
+const fs = require('fs');
+const { optimizeImage } = require('../middleware/upload');
+
+// Helper: optimize uploaded files and return their URL paths
+const processUploadedFiles = async (files, uploadDir) => {
+  const urls = [];
+  for (const f of files) {
+    await optimizeImage(f.path);  // Sharp optimization (non-blocking on failure)
+    urls.push(`/uploads/${f.filename}`);
+  }
+  return urls;
+};
 
 // Helper to format car response
 const formatCar = (car) => {
@@ -143,13 +156,13 @@ exports.createCar = async (req, res) => {
       carData.featured = carData.featured === 'true';
     }
 
-    // Handle uploaded file if single file was uploaded in this request
+    // Handle uploaded file(s) with optimization
     if (req.file) {
-      const fileUrl = `/uploads/${req.file.filename}`;
-      carData.image = fileUrl;
-      carData.images = [fileUrl];
+      const fileUrls = await processUploadedFiles([req.file]);
+      carData.image = fileUrls[0];
+      carData.images = fileUrls;
     } else if (req.files && req.files.length > 0) {
-      const fileUrls = req.files.map((f) => `/uploads/${f.filename}`);
+      const fileUrls = await processUploadedFiles(req.files);
       carData.image = fileUrls[0];
       carData.images = fileUrls;
     }
@@ -223,11 +236,11 @@ exports.updateCar = async (req, res) => {
     }
 
     if (req.file) {
-      const fileUrl = `/uploads/${req.file.filename}`;
-      updateData.image = fileUrl;
-      updateData.images = [fileUrl, ...(existingCar.images || [])];
+      const fileUrls = await processUploadedFiles([req.file]);
+      updateData.image = fileUrls[0];
+      updateData.images = [...fileUrls, ...(existingCar.images || [])];
     } else if (req.files && req.files.length > 0) {
-      const fileUrls = req.files.map((f) => `/uploads/${f.filename}`);
+      const fileUrls = await processUploadedFiles(req.files);
       updateData.image = fileUrls[0];
       updateData.images = [...fileUrls, ...(existingCar.images || [])];
     }
@@ -297,7 +310,8 @@ exports.uploadImages = async (req, res) => {
       });
     }
 
-    const fileUrls = req.files.map((f) => `/uploads/${f.filename}`);
+    // Optimize and return URLs
+    const fileUrls = await processUploadedFiles(req.files);
 
     res.status(200).json({
       success: true,
@@ -306,6 +320,12 @@ exports.uploadImages = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in uploadImages:', error);
+
+    // Clean up partially uploaded files on failure
+    if (req.files && req.files.length > 0) {
+      req.files.forEach((f) => { try { fs.unlinkSync(f.path); } catch (_) {} });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Image upload failed',

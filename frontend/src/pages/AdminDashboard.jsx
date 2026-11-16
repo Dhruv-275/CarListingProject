@@ -36,7 +36,7 @@ const INITIAL_FORM = {
   mileage: 0,
   transmission: 'Automatic',
   fuel: 'Petrol',
-  price: 0,
+  price: '',
   body: 'Saloon',
   description: '',
   featured: false,
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
       mileage: car.mileage || 0,
       transmission: car.transmission || 'Automatic',
       fuel: car.fuel || 'Petrol',
-      price: car.price || 0,
+      price: car.price !== undefined && car.price !== null ? String(car.price) : '',
       body: car.body || 'Saloon',
       description: car.description || '',
       featured: !!car.featured,
@@ -205,16 +205,35 @@ export default function AdminDashboard() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const MAX_SIZE_MB = 20;
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
+
     const uploadData = new FormData();
+
     for (let i = 0; i < files.length; i++) {
-      if (files[i].size > 5 * 1024 * 1024) {
-        setFormError(`File ${files[i].name} exceeds 5 MB size limit.`);
+      const file = files[i];
+
+      // Validate file type
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setFormError(`"${file.name}" is not supported. Use JPEG, PNG, WEBP, or AVIF.`);
         return;
       }
-      uploadData.append('images', files[i]);
+
+      // Validate size — 20 MB max
+      if (file.size > MAX_SIZE_BYTES) {
+        const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+        setFormError(
+          `"${file.name}" is ${sizeMB} MB. Maximum allowed size is ${MAX_SIZE_MB} MB per image.`
+        );
+        return;
+      }
+
+      uploadData.append('images', file);
     }
 
     try {
+      setFormError('');
       const res = await uploadImages(uploadData);
       if (res.success && res.data) {
         const uploadedUrls = res.data;
@@ -226,11 +245,14 @@ export default function AdminDashboard() {
             image: prev.image || combined[0],
           };
         });
-        setFormError('');
+      } else {
+        setFormError(res.message || 'Upload failed. Please try again.');
       }
     } catch (err) {
       console.error('File upload error:', err);
-      setFormError('Failed to upload image(s). Please try again.');
+      // Show the server error message if available, otherwise generic
+      const serverMsg = err?.response?.data?.message || err?.message;
+      setFormError(serverMsg || 'Failed to upload image(s). Please try again.');
     }
   };
 
@@ -271,7 +293,7 @@ export default function AdminDashboard() {
       setFormError('Make and model are required.');
       return;
     }
-    if (formData.price < 1) {
+    if (formData.price === '' || isNaN(Number(formData.price)) || Number(formData.price) < 1) {
       setFormError('Price must be greater than £0.');
       return;
     }
@@ -736,9 +758,9 @@ export default function AdminDashboard() {
                     type="number"
                     min="1"
                     required
-                    value={formData.price}
+                   value={formData.price}
                     onChange={(e) =>
-                      setFormData({ ...formData, price: Number(e.target.value) })
+                      setFormData({ ...formData, price: e.target.value })
                     }
                     placeholder="e.g. 18950"
                   />

@@ -44,6 +44,19 @@ const INITIAL_FORM = {
   images: [],
 };
 
+// Convert image object or string into a valid image URL
+const getImageUrl = (img) => {
+  if (!img) return '';
+
+  if (typeof img === 'string') return img;
+
+  if (typeof img === 'object') {
+    return img.secure_url || img.url || img.imageUrl || '';
+  }
+
+  return '';
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
@@ -67,6 +80,8 @@ export default function AdminDashboard() {
   const [statusMessage, setStatusMessage] = useState('');
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [loadedImages, setLoadedImages] = useState({});
 
   // File Upload State
   const fileInputRef = useRef(null);
@@ -150,16 +165,22 @@ export default function AdminDashboard() {
     setFormData({
       make: car.make || '',
       model: car.model || '',
-      year: car.year || 2022,
-      mileage: car.mileage || 0,
+      year: car.year ?? '',
+      mileage: car.mileage ?? '',
       transmission: car.transmission || 'Automatic',
       fuel: car.fuel || 'Petrol',
       price: car.price !== undefined && car.price !== null ? String(car.price) : '',
       body: car.body || 'Saloon',
       description: car.description || '',
       featured: !!car.featured,
-      image: car.image || '',
-      images: car.images && car.images.length > 0 ? car.images : [car.image].filter(Boolean),
+      image: getImageUrl(car.image),
+      images: (
+        Array.isArray(car.images) && car.images.length > 0
+          ? car.images
+          : [car.image]
+      )
+  .map(getImageUrl)
+  .filter(Boolean),
     });
     setImageUrlInput('');
     setFormError('');
@@ -231,29 +252,47 @@ export default function AdminDashboard() {
 
       uploadData.append('images', file);
     }
+    setIsUploadingImages(true);
 
     try {
       setFormError('');
-      const res = await uploadImages(uploadData);
-      if (res.success && res.data) {
-        const uploadedUrls = res.data;
-        setFormData((prev) => {
-          const combined = [...prev.images, ...uploadedUrls];
-          return {
-            ...prev,
-            images: combined,
-            image: prev.image || combined[0],
-          };
-        });
-      } else {
-        setFormError(res.message || 'Upload failed. Please try again.');
-      }
+       const res = await uploadImages(uploadData);
+
+        console.log('Cloudinary response:', res);
+
+        if (res.success && res.data) {
+          const imageData = Array.isArray(res.data)
+            ? res.data
+            : res.data.images || res.data.urls || [];
+
+         const uploadedUrls = res.data
+          .map((img) => typeof img === "string" ? img : img.url || img.secure_url)
+          .filter(Boolean);
+
+          if (uploadedUrls.length === 0) {
+            throw new Error('Cloudinary returned no valid image URLs.');
+          }
+
+          setFormData((prev) => {
+            const combined = [...prev.images, ...uploadedUrls];
+
+            return {
+              ...prev,
+              images: combined,
+              image: prev.image || combined[0],
+            };
+          });
+        } else {
+          setFormError(res.message || 'Upload failed. Please try again.');
+        }
     } catch (err) {
-      console.error('File upload error:', err);
-      // Show the server error message if available, otherwise generic
-      const serverMsg = err?.response?.data?.message || err?.message;
-      setFormError(serverMsg || 'Failed to upload image(s). Please try again.');
-    }
+        console.error('File upload error:', err);
+
+        const serverMsg = err?.response?.data?.message || err?.message;
+        setFormError(serverMsg || 'Failed to upload image(s). Please try again.');
+      } finally {
+        setIsUploadingImages(false);
+      }
   };
 
   // Add custom image URL
@@ -460,7 +499,7 @@ export default function AdminDashboard() {
                       <td>
                         <div className="admin-car-cell">
                           <img
-                            src={car.image}
+                           src={getImageUrl(car.image)}
                             alt=""
                             width={96}
                             height={64}
@@ -695,8 +734,11 @@ export default function AdminDashboard() {
                     required
                     value={formData.year}
                     onChange={(e) =>
-                      setFormData({ ...formData, year: Number(e.target.value) })
-                    }
+                        setFormData({
+                          ...formData,
+                          year: e.target.value === '' ? '' : Number(e.target.value),
+                        })
+                      }
                   />
                 </div>
 
@@ -710,12 +752,12 @@ export default function AdminDashboard() {
                     min="0"
                     required
                     value={formData.mileage}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        mileage: Number(e.target.value),
-                      })
-                    }
+                   onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      mileage: e.target.value === '' ? '' : Number(e.target.value),
+                    })
+                  }
                   />
                 </div>
 
@@ -839,28 +881,67 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Thumbnail gallery preview */}
-                  {formData.images.length > 0 && (
+                 {formData.images.length > 0 || isUploadingImages ? (
                     <div className="image-preview-grid">
-                      {formData.images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className={`image-preview-item ${idx === 0 ? 'primary-preview' : ''}`}
-                        >
-                          <img src={img} alt={`Preview ${idx + 1}`} />
-                          <button
-                            type="button"
-                            className="remove-img-btn"
-                            onClick={() => handleRemoveImage(idx)}
-                            title="Remove image"
-                            aria-label={`Remove image ${idx + 1}`}
+
+                      {formData.images.map((img, idx) => {
+                        const imageUrl = getImageUrl(img);
+
+                        return (
+                          <div
+                            key={`${imageUrl}-${idx}`}
+                            className={`image-preview-item ${idx === 0 ? 'primary-preview' : ''}`}
                           >
-                            <FiX size={12} />
-                          </button>
-                          {idx === 0 && <span className="primary-badge">Cover</span>}
+                            {!loadedImages[imageUrl] && (
+                              <div className="image-loading-overlay">
+                                <div className="image-loader"></div>
+                              </div>
+                            )}
+
+                            <img
+                              src={imageUrl}
+                              alt={`Preview ${idx + 1}`}
+                              onLoad={() => {
+                                setLoadedImages((prev) => ({
+                                  ...prev,
+                                  [imageUrl]: true,
+                                }));
+                              }}
+                              onError={(e) => {
+                                console.error('Image loading failed:', e.target.src);
+
+                                setLoadedImages((prev) => ({
+                                  ...prev,
+                                  [imageUrl]: true,
+                                }));
+                              }}
+                            />
+
+                            <button
+                              type="button"
+                              className="remove-img-btn"
+                              onClick={() => handleRemoveImage(idx)}
+                              title="Remove image"
+                              aria-label={`Remove image ${idx + 1}`}
+                            >
+                              <FiX size={12} />
+                            </button>
+
+                            {idx === 0 && (
+                              <span className="primary-badge">Cover</span>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {isUploadingImages && (
+                        <div className="image-uploading-box">
+                          <div className="image-loader-center"></div>
                         </div>
-                      ))}
+                      )}
+
                     </div>
-                  )}
+                  ) : null}
 
                   {/* File upload trigger */}
                   <div className="image-uploader-controls">

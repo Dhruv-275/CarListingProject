@@ -2236,6 +2236,56 @@ a.fg-contact-card:hover {
   }
 }
 
+.image-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+  z-index: 2;
+}
+
+.image-loader {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #d1d5db;
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: imageSpin 0.8s linear infinite;
+}
+
+@keyframes imageSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.image-uploading-box {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.image-loader-center {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #d1d5db;
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: imageSpin 0.8s linear infinite;
+}
+
+@keyframes imageSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 
 
